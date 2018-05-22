@@ -9,8 +9,8 @@ from torch.autograd import grad as torch_grad
 
 class Trainer():
     def __init__(self, generator, discriminator, gen_optimizer, dis_optimizer,
-                 gp_weight=10, critic_iterations=15, print_every=50,
-                 use_cuda=False):
+                 gp_weight=10, critic_iterations=5, print_every=50,
+                 use_cuda=True):
         self.G = generator
         self.G_opt = gen_optimizer
         self.D = discriminator
@@ -31,8 +31,8 @@ class Trainer():
         # Get generated data
         batch_size = data.size()[0]
         generated_data = self.sample_generator(batch_size)
-
-        # Calculate probabilities on real and generated data
+        
+        # Calculate probabilities on real and generated data#########################
         data = Variable(data)
         if self.use_cuda:
             data = data.cuda()
@@ -147,6 +147,9 @@ class Trainer():
                 img_grid = np.transpose(img_grid.numpy(), (1, 2, 0))
                 # Add image grid to training progress
                 training_progress_images.append(img_grid)
+                plt.imshow(img_grid)
+                save_checkpoint({'epoch': 22,'state_dict': self.G.state_dict()}, True,"G_checkpoint.pth.tar")
+                save_checkpoint({'epoch': 22,'state_dict': self.D.state_dict()}, True,"D_checkpoint.pth.tar")
 
         if save_training_gif:
             imageio.mimsave('./training_{}_epochs.gif'.format(epochs),
@@ -164,5 +167,3 @@ class Trainer():
         generated_data = self.sample_generator(num_samples)
         # Remove color channel
         return generated_data.data.cpu().numpy()[:, 0, :, :]
-
-
